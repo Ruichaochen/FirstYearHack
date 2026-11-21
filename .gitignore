@@ -1,1 +1,11 @@
+# Python
+.venv/
 
+# IDE
+.junie/
+.idea/
+
+# Node
+frontend/dist/
+frontend/build/
+node_modules/
