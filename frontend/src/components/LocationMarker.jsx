@@ -1,5 +1,4 @@
 import { Marker, Popup } from 'react-map-gl/maplibre'
-import { useState } from 'react'
 
 // Category-specific colors for markers
 const CATEGORY_COLORS = {
@@ -10,20 +9,14 @@ const CATEGORY_COLORS = {
   theatre: '#2ecc71',
 }
 
-function LocationMarker({ location, isSelected, onSelect }) {
-  const [showPopup, setShowPopup] = useState(false)
+function LocationMarker({ location, isSelected, showPopup, onSelect, onPopupClose }) {
   const color = CATEGORY_COLORS[location.category] || '#3388ff'
 
   const handleMarkerClick = (e) => {
     e.originalEvent.stopPropagation()
-    setShowPopup(true)
     if (onSelect) {
       onSelect(location)
     }
-  }
-
-  const handlePopupClose = () => {
-    setShowPopup(false)
   }
 
   const markerStyle = {
@@ -39,7 +32,7 @@ function LocationMarker({ location, isSelected, onSelect }) {
   if (isSelected) {
     markerStyle.width = '36px'
     markerStyle.height = '36px'
-    markerStyle.borderWidth = '4px'
+    markerStyle.border = '4px solid white'
     markerStyle.boxShadow = '0 0 0 4px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.4)'
   }
 
@@ -56,7 +49,7 @@ function LocationMarker({ location, isSelected, onSelect }) {
           longitude={location.longitude}
           latitude={location.latitude}
           anchor="bottom"
-          onClose={handlePopupClose}
+          onClose={onPopupClose}
           closeButton={true}
           closeOnClick={false}
         >

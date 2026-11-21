@@ -66,9 +66,29 @@ function InfoPanel({ location, onClose }) {
             <ul>
               {location.productions_list.map((prod) => (
                 <li key={prod.id}>
-                  {prod.name}
+                  <span>{prod.name}</span>
                   {prod.production_source && (
                     <small className="production-type"> ({prod.production_source})</small>
+                  )}
+                  {prod.production_info && prod.production_info.length > 0 && (
+                    <ul className="production-info-list">
+                      {prod.production_info.map((info, idx) => (
+                        <li key={idx} className="production-info-item">
+                          {info.year && <span className="production-year">{info.year}</span>}
+                          {info.end_year && info.end_year !== info.year && (
+                            <span className="production-year-range">–{info.end_year}</span>
+                          )}
+                          {info.relation && (
+                            <span className="production-relation"> ({info.relation})</span>
+                          )}
+                          {info.wikipedia && (
+                            <a href={info.wikipedia} target="_blank" rel="noopener noreferrer" className="info-link production-wiki">
+                              Wikipedia
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </li>
               ))}

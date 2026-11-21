@@ -1,6 +1,13 @@
 import { Map } from 'react-map-gl/maplibre'
 import 'maplibre-gl/dist/maplibre-gl.css'
+import { setWorkerUrl } from 'maplibre-gl'
+import { useState, useCallback, useRef } from 'react'
 import LocationMarker from './LocationMarker'
+
+// Let Vite build the MapLibre worker as a proper separate file
+import maplibreWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?worker&url'
+
+setWorkerUrl(maplibreWorkerUrl)
 
 const LONDON_CENTER = { lat: 51.5074, lng: -0.1278 }
 
@@ -33,25 +40,59 @@ const OSM_STYLE = {
 }
 
 function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
-  if (loading) {
-    return <div className="map-loading">Loading map...</div>
-  }
+  const [popupLocationId, setPopupLocationId] = useState(null)
+  const [viewState, setViewState] = useState({
+    longitude: LONDON_CENTER.lng,
+    latitude: LONDON_CENTER.lat,
+    zoom: 12,
+  })
+  const programmaticZoom = useRef(false)
 
-  const handleMapClick = (e) => {
+  const handleMapClick = useCallback((e) => {
     // Deselect when clicking on the map (not on a marker)
+    setPopupLocationId(null)
     if (onLocationSelect) {
       onLocationSelect(null)
     }
+  }, [onLocationSelect])
+
+  const handleMarkerSelect = useCallback((location) => {
+    // Close any open popup and open the new one
+    setPopupLocationId(location.id)
+    // Fly to the selected location with a closer zoom
+    programmaticZoom.current = true
+    setViewState({
+      longitude: location.longitude,
+      latitude: location.latitude,
+      zoom: 16,
+    })
+    if (onLocationSelect) {
+      onLocationSelect(location)
+    }
+  }, [onLocationSelect])
+
+  const handlePopupClose = useCallback(() => {
+    setPopupLocationId(null)
+  }, [])
+
+  const handleChange = useCallback((e) => {
+    // Ignore onMove events that are caused by our own programmatic zoom
+    if (programmaticZoom.current) {
+      programmaticZoom.current = false
+      return
+    }
+    setViewState(e.viewState)
+  }, [])
+
+  if (loading) {
+    return <div className="map-loading">Loading map...</div>
   }
 
   return (
     <div className="map-container">
       <Map
-        initialViewState={{
-          longitude: LONDON_CENTER.lng,
-          latitude: LONDON_CENTER.lat,
-          zoom: 12,
-        }}
+        {...viewState}
+        onMove={handleChange}
         mapLib={import('maplibre-gl')}
         style={{ width: '100%', height: '100%' }}
         mapStyle={OSM_STYLE}
@@ -62,7 +103,9 @@ function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
             key={location.id}
             location={location}
             isSelected={selectedLocation?.id === location.id}
-            onSelect={onLocationSelect}
+            showPopup={popupLocationId === location.id}
+            onSelect={handleMarkerSelect}
+            onPopupClose={handlePopupClose}
           />
         ))}
       </Map>

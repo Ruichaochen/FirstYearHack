@@ -1,15 +1,33 @@
 from flask import Blueprint, jsonify, request
-from models.location import Location
+from database import db
+from models.location import Location, Production, LocationProduction, ProductionInfo
 
 locations_bp = Blueprint("locations", __name__)
 
 
 @locations_bp.route("/api/locations", methods=["GET"])
 def get_locations():
-    """Get all locations, optionally filtered by category."""
+    """Get all locations, optionally filtered by category and/or search query."""
     category = request.args.get("category")
+    search = request.args.get("search")
 
-    if category:
+    if search:
+        # Search by location name OR associated production name (case-insensitive)
+        search_pattern = f"%{search}%"
+        location_ids_with_matching_production = db.session.query(LocationProduction.location_id).join(
+            Production
+        ).filter(Production.name.ilike(search_pattern)).distinct()
+
+        query = Location.query.filter(
+            db.or_(
+                Location.name.ilike(search_pattern),
+                Location.id.in_(location_ids_with_matching_production)
+            )
+        )
+
+        if category:
+            query = query.filter_by(category=category)
+    elif category:
         query = Location.query.filter_by(category=category)
     else:
         query = Location.query

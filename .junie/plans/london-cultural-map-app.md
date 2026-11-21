@@ -281,3 +281,35 @@ Remove redundant raw semi-colon string columns and implement a clean many-to-man
 - Update `import_csv.py` and `seed_data.py` to create `LocationProduction` objects
 - Update `InfoPanel.jsx` to use `production_source` instead of `production_type`
 - Update `Location.to_dict()` to build the productions list from the association table
+
+### ✓ Step 9: Add search bar for locations and productions
+Add a search bar that allows searching by production name or location name at the same time.
+- Add `search` query parameter to the backend API (`GET /api/locations?search=query`)
+- Search matches against both location names and associated production names (case-insensitive)
+- Create `SearchBar.jsx` component with debounced input
+- Update `api.js` to pass search queries to the backend
+- Integrate search into `App.jsx` alongside category filtering
+- Style the search bar with responsive CSS
+
+### ✓ Step 10: Add production metadata table and CSV importer
+Add a ProductionInfo table to store year, end_year, relation, and wikipedia for each production, linked via qid from a separate CSV.
+- Create `ProductionInfo` model with `year`, `end_year`, `relation`, and `wikipedia` fields linked to `Production`
+- Update `Production` model with a relationship to `ProductionInfo`
+- Create `import_production_csv.py` script to parse the production metadata CSV and populate the database
+- Update `Location.to_dict()` to include `production_info` in the `productions_list`
+- Update `InfoPanel.jsx` to display production year, end_year, relation, and wikipedia links
+- Add CSS styles for the new production info display
+
+### ✓ Step 11: Redesign UI to match mockup
+Redesign the entire UI to match the provided mockup with dark green header, film strip bottom panel, and integrated search.
+- Redesign `Header.jsx` with dark green background, "LONDON / A CITY IN FRAMES" branding, and integrated search bar
+- Remove standalone `SearchBar.jsx` component, integrate search into header
+- Replace side-panel `InfoPanel.jsx` with a film strip-styled bottom panel (`BottomPanel.jsx`) with 4 cards: Location Name, Image, Location details, Films
+- Remove `FilterBar.jsx` or integrate filtering into the bottom panel
+- Update `App.jsx` layout: header + map + bottom panel (no side panel)
+- Completely rewrite `main.css` with dark green theme, film strip decorations, and responsive design
+- Remove "Website" button from location details
+- Add image popup modal for full-size image viewing
+- Add section labels (Location, Image, Description, Movies) to each card
+- Center text in all cards and improve readability
+- Enhance film roll aesthetic with sprocket holes, gold-bordered cards, and darker background

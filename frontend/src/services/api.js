@@ -1,7 +1,11 @@
 const API_BASE = '/api'
 
-export async function fetchLocations(category) {
-  const url = category ? `${API_BASE}/locations?category=${category}` : `${API_BASE}/locations`
+export async function fetchLocations(category, search) {
+  const params = new URLSearchParams()
+  if (category) params.set('category', category)
+  if (search) params.set('search', search)
+  const queryString = params.toString()
+  const url = queryString ? `${API_BASE}/locations?${queryString}` : `${API_BASE}/locations`
   const response = await fetch(url)
   if (!response.ok) throw new Error('Failed to fetch locations')
   return response.json()

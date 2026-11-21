@@ -18,6 +18,25 @@ class LocationProduction(db.Model):
     production = db.relationship("Production", back_populates="location_productions_entries")
 
 
+class ProductionInfo(db.Model):
+    """Metadata about a production (year, relation, wikipedia page for the media itself).
+
+    Linked to a Production by name. The qid in the source CSV matches a Location's qid,
+    and the production name in the CSV matches a Production's name.
+    """
+
+    __tablename__ = "production_info"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    production_id = db.Column(db.Integer, db.ForeignKey("productions.id"), nullable=False)
+    year = db.Column(db.Integer, nullable=True)
+    end_year = db.Column(db.Integer, nullable=True)
+    relation = db.Column(db.String(200), nullable=True)
+    wikipedia = db.Column(db.String(500), nullable=True)
+
+    production = db.relationship("Production", back_populates="production_info")
+
+
 class Production(db.Model):
     """Model for a production (film, TV show, etc.) associated with one or more locations."""
 
@@ -29,14 +48,19 @@ class Production(db.Model):
     location_productions_entries = db.relationship(
         "LocationProduction", back_populates="production", cascade="all, delete-orphan"
     )
+    production_info = db.relationship(
+        "ProductionInfo", back_populates="production", cascade="all, delete-orphan"
+    )
 
-    def to_dict(self, source=None):
+    def to_dict(self, source=None, info=None):
         d = {
             "id": self.id,
             "name": self.name,
         }
         if source is not None:
             d["production_source"] = source
+        if info is not None:
+            d["production_info"] = info
         return d
 
 
@@ -80,10 +104,20 @@ class Location(db.Model):
 
     def to_dict(self):
         """Convert the location to a dictionary for JSON serialization."""
-        # Build productions list with source info from the association table
+        # Build productions list with source info and production metadata from the association table
         productions = []
         for lp in self.location_productions_entries:
-            productions.append(lp.production.to_dict(source=lp.production_source))
+            prod = lp.production
+            # Gather all production_info records for this production
+            info_list = []
+            for pi in prod.production_info:
+                info_list.append({
+                    "year": pi.year,
+                    "end_year": pi.end_year,
+                    "relation": pi.relation,
+                    "wikipedia": pi.wikipedia,
+                })
+            productions.append(prod.to_dict(source=lp.production_source, info=info_list if info_list else None))
 
         return {
             "id": self.id,
