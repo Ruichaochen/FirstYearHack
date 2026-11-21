@@ -1,29 +1,35 @@
-import { MapContainer, TileLayer, useMapEvents, Marker } from 'react-leaflet'
-import { useState } from 'react'
-import L from 'leaflet'
+import { Map } from 'react-map-gl/maplibre'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import LocationMarker from './LocationMarker'
-import 'leaflet/dist/leaflet.css'
 
-// Fix for default marker icon issue in Leaflet with webpack/vite
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
+const LONDON_CENTER = { lat: 51.5074, lng: -0.1278 }
 
-const LONDON_CENTER = [51.5074, -0.1278]
-
-function LocationClickHandler({ onLocationSelect }) {
-  useMapEvents({
-    click(e) {
-      // Deselect when clicking on the map (not on a marker)
-      if (onLocationSelect) {
-        onLocationSelect(null)
-      }
+// OpenStreetMap-compatible style for MapLibre (avoids MIME type issues with demotiles)
+const OSM_STYLE = {
+  version: 8,
+  name: 'OpenStreetMap',
+  sources: {
+    'osm-tiles': {
+      type: 'raster',
+      tiles: [
+        'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+      ],
+      tileSize: 256,
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     },
-  })
-  return null
+  },
+  layers: [
+    {
+      id: 'osm-tiles-layer',
+      type: 'raster',
+      source: 'osm-tiles',
+      minzoom: 0,
+      maxzoom: 19,
+    },
+  ],
 }
 
 function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
@@ -31,19 +37,26 @@ function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
     return <div className="map-loading">Loading map...</div>
   }
 
+  const handleMapClick = (e) => {
+    // Deselect when clicking on the map (not on a marker)
+    if (onLocationSelect) {
+      onLocationSelect(null)
+    }
+  }
+
   return (
     <div className="map-container">
-      <MapContainer
-        center={LONDON_CENTER}
-        zoom={12}
-        scrollWheelZoom={true}
-        className="map"
+      <Map
+        initialViewState={{
+          longitude: LONDON_CENTER.lng,
+          latitude: LONDON_CENTER.lat,
+          zoom: 12,
+        }}
+        mapLib={import('maplibre-gl')}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle={OSM_STYLE}
+        onClick={handleMapClick}
       >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <LocationClickHandler onLocationSelect={onLocationSelect} />
         {locations.map((location) => (
           <LocationMarker
             key={location.id}
@@ -52,7 +65,7 @@ function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
             onSelect={onLocationSelect}
           />
         ))}
-      </MapContainer>
+      </Map>
     </div>
   )
 }

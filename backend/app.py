@@ -13,6 +13,7 @@ def create_app():
     basedir = os.path.abspath(os.path.dirname(__file__))
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'locations.db')}"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["JSON_AS_ASCII"] = False  # Ensure UTF-8 characters are preserved in JSON responses
 
     # Initialize database
     init_db(app)

@@ -9,6 +9,11 @@ dist/
 build/
 *.db
 
+# Node
+node_modules/
+frontend/dist/
+frontend/build/
+
 # IDE
 .idea/
 *.iml
@@ -18,6 +23,8 @@ build/
 
 # Environment
 .env
+.venv/
+venv/
 
 # OS
 .DS_Store

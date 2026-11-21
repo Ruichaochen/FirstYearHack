@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 """Seed the database with curated London cultural locations."""
 import json
 import os
 from app import create_app
 from database import db
-from models.location import Location
+from models.location import Location, Production, LocationProduction
 
 LOCATIONS_DATA = [
     # FILM locations
@@ -384,12 +385,65 @@ LOCATIONS_DATA = [
 ]
 
 
+# Reverse mapping for CP1252 mojibake
+_CP1252_MOJIBAKE_MAP = {
+    0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84,
+    0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88,
+    0x2039: 0x89, 0x0160: 0x8A, 0x203A: 0x8B, 0x0152: 0x8C,
+    0x017D: 0x8E, 0x2018: 0x91, 0x2019: 0x92, 0x201C: 0x93,
+    0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97,
+    0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x0153: 0x9C,
+    0x017E: 0x9E, 0x0178: 0x9F,
+}
+
+
+def fix_cp1252_mojibake(text):
+    """Fix text corrupted by reading UTF-8 bytes as CP1252."""
+    if not text:
+        return text
+    bytes_list = []
+    has_mojibake = False
+    for char in text:
+        code = ord(char)
+        if code in _CP1252_MOJIBAKE_MAP:
+            bytes_list.append(_CP1252_MOJIBAKE_MAP[code])
+            has_mojibake = True
+        elif code < 256:
+            bytes_list.append(code)
+        else:
+            return text
+    if not has_mojibake:
+        return text
+    try:
+        fixed = bytes(bytes_list).decode("utf-8")
+        return fixed if fixed != text else text
+    except UnicodeDecodeError:
+        return text
+
+
+def parse_semicolon_field(value):
+    """Split a semi-colon separated field into a list of non-empty, stripped strings.
+
+    Filters out numeric-only values (e.g., "0" from verified_productions counts)
+    that should not be treated as production names. Also fixes CP1252 mojibake.
+    """
+    if not value or not value.strip():
+        return []
+    return [
+        fix_cp1252_mojibake(item.strip())
+        for item in value.split(";")
+        if item.strip() and not item.strip().isdigit()
+    ]
+
+
 def seed_database():
     """Populate the database with curated London cultural locations."""
     app = create_app()
 
     with app.app_context():
-        # Clear existing data
+        # Clear existing data in correct order
+        LocationProduction.query.delete()
+        Production.query.delete()
         Location.query.delete()
         db.session.commit()
 
@@ -397,6 +451,24 @@ def seed_database():
         for loc_data in LOCATIONS_DATA:
             location = Location(**loc_data)
             db.session.add(location)
+            db.session.flush()
+
+            # If the location has top_productions or top_modelled, create Production records
+            for field in ["top_modelled", "top_productions"]:
+                raw = loc_data.get(field)
+                if raw:
+                    for item in parse_semicolon_field(raw):
+                        production = Production.query.filter_by(name=item).first()
+                        if not production:
+                            production = Production(name=item)
+                            db.session.add(production)
+                            db.session.flush()
+                        lp = LocationProduction(
+                            location_id=location.id,
+                            production_id=production.id,
+                            production_source=field,
+                        )
+                        db.session.add(lp)
 
         db.session.commit()
         print(f"Successfully seeded {len(LOCATIONS_DATA)} locations into the database.")

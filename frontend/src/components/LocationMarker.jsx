@@ -1,5 +1,5 @@
-import { Marker, Popup } from 'react-leaflet'
-import L from 'leaflet'
+import { Marker, Popup } from 'react-map-gl/maplibre'
+import { useState } from 'react'
 
 // Category-specific colors for markers
 const CATEGORY_COLORS = {
@@ -10,49 +10,65 @@ const CATEGORY_COLORS = {
   theatre: '#2ecc71',
 }
 
-function createCategoryIcon(category) {
-  const color = CATEGORY_COLORS[category] || '#3388ff'
-
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="
-      width: 30px;
-      height: 30px;
-      background-color: ${color};
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    "></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15],
-    popupAnchor: [0, -15],
-  })
-}
-
 function LocationMarker({ location, isSelected, onSelect }) {
-  const icon = createCategoryIcon(location.category)
+  const [showPopup, setShowPopup] = useState(false)
+  const color = CATEGORY_COLORS[location.category] || '#3388ff'
 
-  const handleMarkerClick = () => {
+  const handleMarkerClick = (e) => {
+    e.originalEvent.stopPropagation()
+    setShowPopup(true)
     if (onSelect) {
       onSelect(location)
     }
   }
 
+  const handlePopupClose = () => {
+    setShowPopup(false)
+  }
+
+  const markerStyle = {
+    width: '30px',
+    height: '30px',
+    backgroundColor: color,
+    borderRadius: '50%',
+    border: '3px solid white',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+    cursor: 'pointer',
+  }
+
+  if (isSelected) {
+    markerStyle.width = '36px'
+    markerStyle.height = '36px'
+    markerStyle.borderWidth = '4px'
+    markerStyle.boxShadow = '0 0 0 4px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.4)'
+  }
+
   return (
     <Marker
-      position={[location.latitude, location.longitude]}
-      icon={icon}
-      eventHandlers={{
-        click: handleMarkerClick,
-      }}
+      longitude={location.longitude}
+      latitude={location.latitude}
+      anchor="bottom"
+      onClick={handleMarkerClick}
     >
-      <Popup>
-        <div className="popup-content">
-          <h3>{location.name}</h3>
-          <p className="popup-category">{location.category}</p>
-          <p>{location.description.substring(0, 100)}...</p>
-        </div>
-      </Popup>
+      <div style={markerStyle} />
+      {showPopup && (
+        <Popup
+          longitude={location.longitude}
+          latitude={location.latitude}
+          anchor="bottom"
+          onClose={handlePopupClose}
+          closeButton={true}
+          closeOnClick={false}
+        >
+          <div className="popup-content">
+            <h3>{location.name}</h3>
+            <p className="popup-category">{location.category}</p>
+            {location.description && (
+              <p>{location.description.length > 100 ? location.description.substring(0, 100) + '...' : location.description}</p>
+            )}
+          </div>
+        </Popup>
+      )}
     </Marker>
   )
 }

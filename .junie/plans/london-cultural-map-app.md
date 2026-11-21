@@ -253,3 +253,31 @@ Merge all branches, fix integration issues, and finalize the app.
 - CORS configured, API working, styling applied
 - Loading states and error handling added
 - README with setup and run instructions completed
+
+### ✓ Step 6: Extend data model and add CSV parser
+Add support for importing the CSV dataset with all its columns, efficiently storing semi-colon separated production lists.
+- Extend the Location model with new columns from the CSV (qid, category_label, resolution, country, iso, fame_rank, fame_tier, wiki_productions, modelled_for, top_modelled, top_productions, wikipedia, wikidata, image, image_page, url, image_by, image_licence, image_licence_url, verified_productions, top_verified, productions)
+- Create a Production association table to store semi-colon separated values from `top_modelled` and `top_productions` as individual related records
+- Create `import_csv.py` script to parse the CSV, split multi-value fields, and populate the database
+- Update API endpoints to include the new fields in responses
+- Update the seed script to work with the extended model
+
+### ✓ Step 7: Migrate map display to MapLibre GL JS
+Replace Leaflet with MapLibre GL JS for a more modern, performant map abstraction.
+- Install `maplibre-gl` and `react-map-gl` packages in the frontend
+- Replace Leaflet/React-Leaflet with MapLibre GL JS + OpenStreetMap-compatible vector tiles
+- Rewrite `MapView.jsx` to use MapLibre's `<Map>` component
+- Rewrite `LocationMarker.jsx` to use MapLibre's `<Marker>` component with custom category icons
+- Update CSS for MapLibre-specific styling
+- Remove Leaflet dependencies from package.json
+- Ensure filtering, popups, and info panel integration still work correctly
+
+### ✓ Step 8: Implement proper many-to-many schema
+Remove redundant raw semi-colon string columns and implement a clean many-to-many relationship using an association object.
+- Remove `top_modelled`, `top_productions`, `verified_productions`, `top_verified`, and `productions` columns from the Location model
+- Replace the plain `db.Table` with a `LocationProduction` association class carrying `production_source`
+- Simplify the `Production` model to store only the name (with `unique=True`)
+- Link all relationships properly with `back_populates` to avoid SQLAlchemy overlap warnings
+- Update `import_csv.py` and `seed_data.py` to create `LocationProduction` objects
+- Update `InfoPanel.jsx` to use `production_source` instead of `production_type`
+- Update `Location.to_dict()` to build the productions list from the association table
