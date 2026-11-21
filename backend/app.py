@@ -5,28 +5,21 @@ from database import db, init_db
 from routes.locations import locations_bp
 
 
-def create_app():
-    """Create and configure the Flask application."""
-    app = Flask(__name__)
 
-    # Configuration
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'locations.db')}"
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JSON_AS_ASCII"] = False  # Ensure UTF-8 characters are preserved in JSON responses
+app = Flask(__name__)
 
-    # Initialize database
-    init_db(app)
+# Configuration
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{os.path.join(basedir, 'locations.db')}"
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["JSON_AS_ASCII"] = False  # Ensure UTF-8 characters are preserved in JSON responses
 
-    # Enable CORS for frontend
-    CORS(app)
+# Initialize database
+init_db(app)
 
-    # Register blueprints
-    app.register_blueprint(locations_bp)
+# Enable CORS for frontend
+CORS(app)
 
-    return app
+# Register blueprints
+app.register_blueprint(locations_bp)
 
-
-if __name__ == "__main__":
-    app = create_app()
-    app.run(debug=True, port=5000)
