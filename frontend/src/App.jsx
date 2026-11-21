@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import Header from './components/Header'
-import FilterBar from './components/FilterBar'
 import MapView from './components/MapView'
 import BottomPanel from './components/BottomPanel'
 import { fetchLocations, fetchCategories } from './services/api'
@@ -100,18 +99,18 @@ function App() {
 
   return (
     <div className="app">
-      <Header onSearch={handleSearch} />
+      <Header
+        onSearch={handleSearch}
+        categories={categories}
+        selectedCategories={selectedCategories}
+        onCategoryToggle={handleCategoryToggle}
+      />
       <div className="main-content">
         <MapView
           locations={locations}
           onLocationSelect={handleLocationSelect}
           selectedLocation={selectedLocation}
           loading={loading}
-        />
-        <FilterBar
-          categories={categories}
-          selectedCategories={selectedCategories}
-          onCategoryToggle={handleCategoryToggle}
         />
         <BottomPanel
           location={selectedLocation}
