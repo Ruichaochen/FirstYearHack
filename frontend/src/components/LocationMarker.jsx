@@ -49,7 +49,7 @@ function LocationMarker({ location, isSelected, showPopup, onSelect, onPopupClos
         <Popup
           longitude={location.longitude}
           latitude={location.latitude}
-          anchor="bottom"
+          anchor="top"
           onClose={onPopupClose}
           closeButton={true}
           closeOnClick={false}
