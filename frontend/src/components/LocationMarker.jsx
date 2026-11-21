@@ -10,7 +10,7 @@ const CATEGORY_COLORS = {
 }
 
 function LocationMarker({ location, isSelected, showPopup, onSelect, onPopupClose }) {
-  const color = CATEGORY_COLORS[location.category] || '#3388ff'
+  const color = CATEGORY_COLORS[location.category] || '#263b36'
 
   const handleMarkerClick = (e) => {
     e.originalEvent.stopPropagation()
@@ -20,8 +20,8 @@ function LocationMarker({ location, isSelected, showPopup, onSelect, onPopupClos
   }
 
   const markerStyle = {
-    width: '30px',
-    height: '30px',
+    width: '20px',
+    height: '20px',
     backgroundColor: color,
     borderRadius: '50%',
     border: '3px solid white',
@@ -30,9 +30,10 @@ function LocationMarker({ location, isSelected, showPopup, onSelect, onPopupClos
   }
 
   if (isSelected) {
-    markerStyle.width = '36px'
-    markerStyle.height = '36px'
+    markerStyle.width = '25px'
+    markerStyle.height = '25px'
     markerStyle.border = '4px solid white'
+    markerStyle.backgroundColor = "#d75d45"
     markerStyle.boxShadow = '0 0 0 4px rgba(0,0,0,0.2), 0 2px 8px rgba(0,0,0,0.4)'
   }
 

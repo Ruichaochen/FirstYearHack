@@ -24,12 +24,19 @@ body {
 .header {
   background: #1a2e28;
   color: #f5f0e8;
-  padding: 16px 28px;
+  padding: 12px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   z-index: 1000;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  height: 10%;
+}
+
+.header-filters {
+  margin: 0 auto;
 }
 
 .header-branding {
@@ -64,7 +71,7 @@ body {
   background: #f5f0e8;
   border-radius: 24px;
   padding: 8px 16px;
-  width: 340px;
+  width: 500px;
   max-width: 40vw;
 }
 
@@ -150,19 +157,12 @@ body {
   line-height: 1.4;
 }
 
-/* ===== Filter Bar (overlaid on map) ===== */
-.filter-bar {
-  position: absolute;
-  top: 12px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
+/* ===== Header Filters ===== */
+.header-filters {
   display: flex;
-  gap: 8px;
-  background: rgba(26, 46, 40, 0.85);
-  backdrop-filter: blur(8px);
-  padding: 8px 16px;
-  border-radius: 24px;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .filter-buttons {
@@ -173,12 +173,12 @@ body {
 }
 
 .filter-button {
-  padding: 6px 14px;
+  padding: 5px 12px;
   border: 2px solid rgba(245, 240, 232, 0.4);
   border-radius: 16px;
   background: transparent;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
   font-family: 'Georgia', serif;
   color: #f5f0e8;
@@ -198,14 +198,15 @@ body {
 }
 
 .clear-filters {
-  padding: 6px 12px;
+  padding: 5px 10px;
   border: none;
   background: none;
   color: #d4a574;
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-family: 'Georgia', serif;
   text-decoration: underline;
+  white-space: nowrap;
 }
 
 .clear-filters:hover {
@@ -257,6 +258,7 @@ body {
   background: #f3e9d5;
   border-radius: 4px;
   flex-shrink: 0;
+  padding: 0 20px;
 }
 
 .film-strip-top::after,
@@ -266,7 +268,7 @@ body {
   left: 0;
   right: 0;
   height: 1px;
-  background: #2a4a40;
+  background: #0d1a14;
 }
 
 .film-strip-top::after {
@@ -311,7 +313,8 @@ body {
   gap: 4%;
   padding: 0 20px;
   justify-content: center;
-  align-items: stretch;
+  align-items: center;
+  height: 100%;
 }
 
 .bottom-card {
@@ -319,6 +322,7 @@ body {
   border-radius: 4px;
   padding: 14px 20px;
   width: 20vw;
+  height: 80%;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -398,6 +402,7 @@ body {
 
 .location-image-wrapper img {
   width: 100%;
+  height: fit-content;
   max-height: 110px;
   object-fit: contain;
   border-radius: 2px;
@@ -699,6 +704,12 @@ body {
     font-size: clamp(0.6rem, 1.5vw, 0.85rem);
   }
 
+  .header-filters {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+  }
+
   .header-search {
     width: 100%;
     max-width: 100%;
@@ -707,12 +718,6 @@ body {
 
   .header-search .search-input {
     font-size: clamp(0.75rem, 2vw, 0.9rem);
-  }
-
-  .filter-bar {
-    top: 8px;
-    padding: 6px 10px;
-    gap: 4px;
   }
 
   .filter-button {
@@ -849,10 +854,6 @@ body {
 @media (min-height: 900px) {
   .bottom-panel {
     max-height: 35vh;
-  }
-
-  .location-image-wrapper img {
-    max-height: 140px;
   }
 
   .details-card,

@@ -25,7 +25,7 @@ const OSM_STYLE = {
       ],
       tileSize: 256,
       attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     },
   },
   layers: [
@@ -66,6 +66,12 @@ function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
       latitude: location.latitude,
       zoom: 16,
     })
+    /*mapInstance.current.flyTo({
+      center: [location.latitude, location.longitude],
+      zoom: 16,
+      duration: 1000,
+      essential: true,
+    })*/
     if (onLocationSelect) {
       onLocationSelect(location)
     }
@@ -89,27 +95,27 @@ function MapView({ locations, onLocationSelect, selectedLocation, loading }) {
   }
 
   return (
-    <div className="map-container">
-      <Map
-        {...viewState}
-        onMove={handleChange}
-        mapLib={import('maplibre-gl')}
-        style={{ width: '100%', height: '100%' }}
-        mapStyle={OSM_STYLE}
-        onClick={handleMapClick}
-      >
-        {locations.map((location) => (
-          <LocationMarker
-            key={location.id}
-            location={location}
-            isSelected={selectedLocation?.id === location.id}
-            showPopup={popupLocationId === location.id}
-            onSelect={handleMarkerSelect}
-            onPopupClose={handlePopupClose}
-          />
-        ))}
-      </Map>
-    </div>
+      <div className="map-container">
+        <Map
+            {...viewState}
+            onMove={handleChange}
+            mapLib={import('maplibre-gl')}
+            style={{ width: '100%', height: '100%' }}
+            mapStyle={OSM_STYLE}
+            onClick={handleMapClick}
+        >
+          {locations.map((location) => (
+              <LocationMarker
+                  key={location.id}
+                  location={location}
+                  isSelected={selectedLocation?.id === location.id}
+                  showPopup={popupLocationId === location.id}
+                  onSelect={handleMarkerSelect}
+                  onPopupClose={handlePopupClose}
+              />
+          ))}
+        </Map>
+      </div>
   )
 }
 

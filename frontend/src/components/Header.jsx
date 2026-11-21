@@ -1,6 +1,14 @@
 import { useState, useRef } from 'react'
 
-function Header({ onSearch }) {
+const CATEGORY_LABELS = {
+  film: '🎬 Film',
+  music: '🎵 Music',
+  literature: '📚 Literature',
+  tv: '📺 TV',
+  theatre: '🎭 Theatre',
+}
+
+function Header({ onSearch, categories, selectedCategories, onCategoryToggle }) {
   const [query, setQuery] = useState('')
   const inputRef = useRef(null)
   const debounceRef = useRef(null)
@@ -27,8 +35,34 @@ function Header({ onSearch }) {
   return (
     <header className="header">
       <div className="header-branding">
-        <h1 className="header-title">LONDON</h1>
-        <p className="header-subtitle">A CITY IN FRAMES</p>
+        <h1 className="header-title">THE UK</h1>
+        <p className="header-subtitle">A COUNTRY IN FRAMES</p>
+      </div>
+      <div className="header-filters">
+        <div className="filter-buttons">
+          {categories.map((category) => {
+            const isSelected = selectedCategories.includes(category)
+            return (
+              <button
+                key={category}
+                className={`filter-button ${isSelected ? 'active' : ''}`}
+                onClick={() => onCategoryToggle(category)}
+              >
+                {CATEGORY_LABELS[category] || category}
+              </button>
+            )
+          })}
+        </div>
+        {selectedCategories.length > 0 && (
+          <button
+            className="clear-filters"
+            onClick={() => {
+              selectedCategories.forEach((cat) => onCategoryToggle(cat))
+            }}
+          >
+            Clear
+          </button>
+        )}
       </div>
       <div className="header-search">
         <span className="search-icon">
